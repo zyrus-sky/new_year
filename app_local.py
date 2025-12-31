@@ -3,6 +3,7 @@ import streamlit as st
 import random
 from datetime import datetime
 import base64
+from fpdf import FPDF
 import io
 
 # --- Helper function to add styling ---
@@ -31,6 +32,66 @@ def local_css():
     
     </style>
     """, unsafe_allow_html=True)
+
+# --- PDF Generation Logic (Legacy FPDF) ---
+def create_pdf(selected_rights):
+    # Using legacy FPDF syntax to ensure compatibility
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    
+    # Title
+    pdf.set_font("Arial", 'B', 24)
+    pdf.set_text_color(76, 175, 80) # Green
+    # ln=1 moves cursor to the next line
+    pdf.cell(0, 20, "Official Friendship Contract", ln=1, align='C')
+    
+    # Metadata
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font("Arial", 'I', 12)
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    pdf.cell(0, 10, f"Date: {date_str}", ln=1, align='R')
+    
+    # Intro
+    pdf.set_font("Arial", '', 12)
+    intro = "This document certifies that Arsha has been granted the following rights by Idiot Scientist for the 2026 season:"
+    pdf.multi_cell(0, 8, intro)
+    pdf.ln(5)
+    
+    # Rights List
+    pdf.set_font("Arial", '', 11)
+    
+    def sanitize(text):
+        # Strip unsupported characters for Latin-1
+        return text.encode('latin-1', 'replace').decode('latin-1').replace('?', '')
+
+    for i, right in enumerate(sorted(selected_rights)):
+        clean_text = right.replace("CUSTOM: ", "")
+        safe_text = sanitize(clean_text)
+        pdf.multi_cell(0, 7, f"{i+1}. {safe_text}")
+    
+    pdf.ln(15)
+    
+    # Signature Block
+    y = pdf.get_y()
+    if y > 240: 
+        pdf.add_page()
+        y = 20
+        
+    pdf.set_draw_color(0, 0, 0)
+    pdf.line(20, y+10, 80, y+10)
+    pdf.text(20, y+15, "Signed: Idiot Scientist")
+    
+    pdf.line(110, y+10, 170, y+10)
+    pdf.text(110, y+15, "Signed: Arsha")
+    
+    # Footer
+    pdf.set_y(-20)
+    pdf.set_font("Arial", 'I', 8)
+    pdf.set_text_color(150, 150, 150)
+    pdf.cell(0, 10, "Contract ID: FRIEND-2026-SECURE | Valid in all dimensions.", ln=1, align='C')
+    
+    return pdf.output(dest='S').encode('latin-1')
 
 # --- HTML Generation (Fallback) ---
 def create_html(selected_rights):
@@ -326,7 +387,19 @@ def main():
         if st.session_state.show_download and count > 0:
             st.success("Rights Claimed! Choose format:")
             
-            # HTML Option ONLY (Cloud Friendly)
+            # 1. PDF Option (Preferred)
+            try:
+                pdf_bytes = create_pdf(list(st.session_state.selected_keys))
+                st.download_button(
+                    label="📄 Download PDF Contract",
+                    data=pdf_bytes,
+                    file_name="Friendship_Contract_2026.pdf",
+                    mime="application/pdf"
+                )
+            except Exception as e:
+                st.error(f"PDF Error: {e}")
+            
+            # 2. HTML Option (Backup)
             html_bytes = create_html(list(st.session_state.selected_keys))
             st.download_button(
                 label="🌐 Download HTML (Print Friendly)",
