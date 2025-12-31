@@ -36,7 +36,36 @@ def local_css():
         margin-bottom: 20px;
         border-bottom: 1px solid #eee;
     }
+    
+    /* Corner Fireworks Animation */
+    @keyframes firework-animation {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.2) rotate(10deg); opacity: 1; text-shadow: 0 0 10px #ff00de, 0 0 20px #ff00de; }
+        100% { transform: scale(1); opacity: 0.8; }
+    }
+    .firework-corner-left {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        font-size: 60px;
+        animation: firework-animation 2s infinite ease-in-out;
+        z-index: 9999;
+        pointer-events: none;
+    }
+    .firework-corner-right {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        font-size: 60px;
+        animation: firework-animation 2.5s infinite ease-in-out;
+        z-index: 9999;
+        pointer-events: none;
+    }
     </style>
+    
+    <!-- Corner Elements -->
+    <div class="firework-corner-left">🎆</div>
+    <div class="firework-corner-right">🎆</div>
     """, unsafe_allow_html=True)
 
 # --- PDF Generation Logic (Legacy FPDF) ---
@@ -371,9 +400,14 @@ def main():
     def claim_callback():
         st.session_state.show_download = True
 
-    st.header("🏆 The Premium Friendship Package (Deluxe Edition) 🏆")
+    st.header("🏆 2026th Season Friendship Package renewal 🏆")
     st.write("You've unlocked the ultimate reward: 'Friend Rights'.")
     st.info("Limit Removed: You can choose **UNLIMITED** rights. Go wild.")
+
+    # --- Launch Fireworks ---
+    if 'first_load_fireworks' not in st.session_state:
+        st.balloons()
+        st.session_state.first_load_fireworks = True
 
     # --- TOP AREA: CLAIM & DOWNLOAD ---
     # This prevents scrolling down to find success message.
