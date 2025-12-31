@@ -116,10 +116,10 @@ def create_html(selected_rights):
     <body onload="window.print()">
         <h1>Official Friendship Contract</h1>
         <div class="date">Date: {date_str}</div>
-        <p>This document certifies that <strong>Arsha</strong> has been granted the following rights by <strong>Idiot Scientist</strong> for the 2026 season:</p>
+        <p>This document certifies that <strong>Arsha</strong> has been granted the following rights by <strong>Sree Krishna</strong> for the 2026 season:</p>
         <ul>{items_html}</ul>
         <div class="signature-box">
-            <div class="sig">Signed: Idiot Scientist</div>
+            <div class="sig">Signed: Sree Krishna</div>
             <div class="sig">Signed: Arsha</div>
         </div>
     </body>
